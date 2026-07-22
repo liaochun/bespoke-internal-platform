@@ -1,0 +1,17 @@
+/* Excerpted from a private production codebase for portfolio purposes. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: Inter, system-ui, sans-serif;
+    color: #2c2825;
+    background: #faf8f5;
+  }
+
+  h1, h2, h3, h4, h5 {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-weight: 500;
+  }
+}
