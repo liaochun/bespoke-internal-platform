@@ -165,12 +165,6 @@ function Inner() {
             <p className="font-mono text-tiny uppercase tracking-widest text-clay">Admin</p>
             <h1 className="mt-sm font-serif text-display text-stone">Users & invites</h1>
           </div>
-          <Link
-            href="/admin/emergency-contacts"
-            className="rounded-sm border border-sand px-md py-sm text-tiny uppercase tracking-widest text-stone hover:bg-sand/20"
-          >
-            Emergency contacts
-          </Link>
         </header>
 
         {error && (
@@ -927,25 +921,11 @@ function UserRow({
             <p className="text-tiny uppercase tracking-widest text-clay">Profile</p>
             <div className="flex flex-wrap gap-sm">
               <Link
-                href={`/admin/staff/${u.id}`}
-                className="rounded-sm border border-sand px-md py-sm text-tiny uppercase tracking-widest text-stone hover:bg-sand/20"
-              >
-                Open profile
-              </Link>
-              <Link
                 href={`/admin/users/${u.id}`}
                 className="rounded-sm border border-sand px-md py-sm text-tiny uppercase tracking-widest text-stone hover:bg-sand/20"
               >
                 Emergency contact
               </Link>
-              {canPreview && (
-                <Link
-                  href={`/admin/users/${u.id}/preview`}
-                  className="rounded-sm border border-sand px-md py-sm text-tiny uppercase tracking-widest text-stone hover:bg-sand/20"
-                >
-                  View as
-                </Link>
-              )}
             </div>
           </div>
         </div>

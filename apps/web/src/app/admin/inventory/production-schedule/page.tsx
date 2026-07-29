@@ -1412,12 +1412,6 @@ function RunDetail({
               >
                 Link recipe
               </button>
-              <a
-                href="/admin/inventory/recipes"
-                className="text-tiny text-stone/50 hover:text-stone hover:underline"
-              >
-                or create a new recipe
-              </a>
             </div>
           ) : (
             <div className="mt-sm space-y-xs">
@@ -1444,10 +1438,7 @@ function RunDetail({
                     ))}
                   {recipes.filter((r) => r.finished_item_id === run.finished_item_id).length === 0 && (
                     <p className="text-tiny text-stone/50">
-                      No existing recipes for this item.{" "}
-                      <a href="/admin/inventory/recipes" className="underline hover:text-stone">
-                        Create one here.
-                      </a>
+                      No existing recipes for this item.
                     </p>
                   )}
                 </>

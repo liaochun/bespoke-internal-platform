@@ -13,7 +13,6 @@ import { CurrentUser, fetchNavLayout, logout, NavLayout } from "@/lib/api";
 import {
   CAP,
   canManageWorkforce,
-  canViewDocuments,
   clocksIn,
   has,
   roleLabel,
@@ -23,29 +22,17 @@ import {
   useNotificationBadges,
 } from "@/lib/useNotificationBadges";
 
-function staffLinks(badges: NotificationBadges): NavItem[] {
-  return [
-    { href: "/me/schedule", label: "My schedule", description: "Upcoming shifts" },
-    {
-      href: "/me/hours",
-      label: "My hours",
-      description: "This week + request fixes",
-      badge: badges.myCorrectionUpdates,
-      onClick: () => badges.markSeen("my_punch_corrections"),
-    },
-    { href: "/me/availability", label: "My availability", description: "Hours you can work each weekday" },
-    {
-      href: "/me/time-off",
-      label: "My time off",
-      description: "Request OOO",
-      badge: badges.myTimeOffUpdates,
-      onClick: () => badges.markSeen("my_time_off"),
-    },
-    { href: "/me/notifications", label: "Notifications", description: "Email preferences" },
-    { href: "/me/profile", label: "Profile", description: "Change your display name" },
-  ];
+// Only /me/schedule is included in this excerpt — the other "Me" pages
+// (hours, availability, time off, notifications, profile) exist in the real
+// app but aren't part of this curated demo, so they're left out of nav here
+// rather than linking somewhere that 404s.
+function staffLinks(_badges: NotificationBadges): NavItem[] {
+  return [{ href: "/me/schedule", label: "My schedule", description: "Upcoming shifts" }];
 }
 
+// Only routes with real pages in this excerpt are listed — the real app has
+// several more Workforce pages (time off, punch corrections, studio QR, and
+// the same "Me" pages omitted in staffLinks()) that aren't part of this demo.
 function workforceLinks(user: CurrentUser, badges: NotificationBadges): NavItem[] {
   const items: NavItem[] = [];
   if (has(user, CAP.manage_schedule)) {
@@ -55,50 +42,14 @@ function workforceLinks(user: CurrentUser, badges: NotificationBadges): NavItem[
       description: "Plan staff shifts",
     });
     items.push({
-      href: "/admin/time-off",
-      label: "Time off",
-      description: "Approve OOO requests",
-      badge: badges.pendingTimeOff,
-    });
-    items.push({
       href: "/admin/sick-calls",
       label: "Sick calls",
       description: "Pending sick calls + open offers",
       badge: badges.pendingSickCalls,
     });
   }
-  if (has(user, CAP.review_corrections)) {
-    items.push({
-      href: "/admin/punch-corrections",
-      label: "Punch corrections",
-      description: "Approve fixes",
-      badge: badges.pendingCorrections,
-    });
-  }
-  if (has(user, CAP.print_qr)) {
-    items.push({ href: "/admin/qr", label: "Studio QR", description: "Print clock-in code" });
-  }
   if (clocksIn(user)) {
-    items.push(
-      { href: "/me/schedule", label: "My schedule", description: "Your own upcoming shifts" },
-      {
-        href: "/me/hours",
-        label: "My hours",
-        description: "Your own punches",
-        badge: badges.myCorrectionUpdates,
-        onClick: () => badges.markSeen("my_punch_corrections"),
-      },
-      { href: "/me/availability", label: "My availability", description: "Hours you can work each weekday" },
-      {
-        href: "/me/time-off",
-        label: "My time off",
-        description: "Request OOO",
-        badge: badges.myTimeOffUpdates,
-        onClick: () => badges.markSeen("my_time_off"),
-      },
-      { href: "/me/notifications", label: "Notifications", description: "Email preferences" },
-      { href: "/me/profile", label: "Profile", description: "Change your display name" },
-    );
+    items.push({ href: "/me/schedule", label: "My schedule", description: "Your own upcoming shifts" });
   }
   return items;
 }
@@ -108,9 +59,9 @@ function inventoryLinks(user: CurrentUser): NavItem[] {
   if (process.env.NEXT_PUBLIC_INVENTORY_ENABLED === "false") return items;
   if (has(user, CAP.view_inventory) || has(user, CAP.manage_inventory)) {
     items.push({
-      href: "/admin/inventory",
-      label: "Master items",
-      description: "Catalog + stock by location",
+      href: "/admin/inventory/dashboard",
+      label: "Inventory dashboard",
+      description: "Stock levels, revenue snapshot, production capacity",
     });
   }
   return items;
@@ -137,21 +88,6 @@ function productionLinks(user: CurrentUser): NavItem[] {
         label: "Calendar",
         description: "Scheduled runs by day",
       },
-      {
-        href: "/admin/inventory/production-history",
-        label: "Production history",
-        description: "Completed runs",
-      },
-      {
-        href: "/admin/inventory/recipes",
-        label: "Recipes",
-        description: "BOM recipes for finished SKUs",
-      },
-      {
-        href: "/admin/inventory/production-rates/guardrails",
-        label: "Rate guardrails",
-        description: "Per-SKU production rate limits",
-      },
     );
   }
   return items;
@@ -165,9 +101,13 @@ function productionLinks(user: CurrentUser): NavItem[] {
  * The dropdown itself only renders when at least one item passes its gate
  * (handled by the Header via `adminLinks(user).length > 0`).
  */
+// Only routes with real pages in this excerpt are listed. The real app's
+// Admin section also has discipline, documents, view-as, bug reports,
+// schedule tools, nav layout, kiosk activity, and integrations pages — none
+// of those are part of this curated demo, so they're left out here.
 function adminLinks(
   user: CurrentUser,
-  badges?: { pendingDisciplineActions: number },
+  _badges?: { pendingDisciplineActions: number },
 ): NavItem[] {
   const items: NavItem[] = [];
   if (has(user, CAP.view_users) || has(user, CAP.manage_users) || has(user, CAP.manage_invites)) {
@@ -177,43 +117,6 @@ function adminLinks(
       description: "Staff list, roles, kiosk PIN, invites",
     });
   }
-  if (has(user, CAP.manage_users)) {
-    items.push({
-      href: "/admin/discipline/queue",
-      label: "Discipline",
-      description: "Queue, history, and PIPS policy",
-      badge: badges?.pendingDisciplineActions || undefined,
-    });
-  }
-  if (canViewDocuments(user)) {
-    items.push({
-      href: "/admin/documents",
-      label: "Documents",
-      description: "Generated PIPS & discipline documents",
-    });
-  }
-  if (user.role === "super_admin") {
-    items.push({
-      href: "/admin/view-as",
-      label: "View as user",
-      description: "Open any staff member's read-only capability preview",
-    });
-    items.push({
-      href: "/admin/bug-reports",
-      label: "Bug reports",
-      description: "Triage user-submitted bug reports",
-    });
-    items.push({
-      href: "/admin/schedule-tools",
-      label: "Schedule tools",
-      description: "Clear all schedules + restore from a snapshot",
-    });
-    items.push({
-      href: "/admin/nav-layout",
-      label: "Nav layout",
-      description: "Reorder the tabs in each nav section",
-    });
-  }
   if (has(user, CAP.manage_permissions)) {
     items.push({
       href: "/admin/roles",
@@ -221,25 +124,11 @@ function adminLinks(
       description: "Configure defaults per role",
     });
   }
-  if (has(user, CAP.review_corrections)) {
-    items.push({
-      href: "/admin/kiosk-activity",
-      label: "Kiosk activity",
-      description: "Audit device-to-staff usage for abuse",
-    });
-  }
   if (has(user, CAP.view_timesheets) || has(user, CAP.export_timesheets)) {
     items.push({
       href: "/admin/timesheets",
       label: "Timesheets",
       description: "Hours export for payroll",
-    });
-  }
-  if (has(user, CAP.manage_inventory)) {
-    items.push({
-      href: "/admin/integrations",
-      label: "Integrations",
-      description: "Shopify webhooks + setup",
     });
   }
   return items;
@@ -383,11 +272,8 @@ export function Header() {
         <div className="ml-auto flex items-center gap-sm">
           <PersonaSwitcher />
           <HeaderSyncDot />
-          <Link
-            href="/me/profile"
-            className="hidden items-center gap-sm rounded-sm px-xs py-xs hover:bg-sand/20 md:flex"
-            title="Profile"
-          >
+          {/* Not a Link — /me/profile isn't part of this excerpt's included pages. */}
+          <div className="hidden items-center gap-sm rounded-sm px-xs py-xs md:flex" title={user.full_name}>
             <span
               className="flex h-8 w-8 items-center justify-center rounded-full bg-sand/40 font-mono text-tiny font-medium text-stone"
               aria-hidden
@@ -400,7 +286,7 @@ export function Header() {
                 {roleLabel(user.role)}
               </span>
             </span>
-          </Link>
+          </div>
           <button
             type="button"
             onClick={onLogout}

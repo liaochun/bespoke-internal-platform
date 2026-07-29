@@ -8,7 +8,6 @@ import { AuthGate } from "@/components/AuthGate";
 import { CapabilityGate } from "@/components/CapabilityGate";
 import { CustomerDrawer } from "@/components/CustomerDrawer";
 import { Header } from "@/components/Header";
-import { InventoryNav } from "@/components/InventoryNav";
 import { OpsV2HeroStrip } from "@/components/OpsV2HeroStrip";
 import {
   ApiError,
@@ -226,12 +225,7 @@ function Inner() {
               <p className="font-mono text-tiny uppercase tracking-widest text-clay">Inventory</p>
               <h1 className="mt-sm font-serif text-display text-stone">Dashboard</h1>
               <p className="mt-md text-body text-stone/70">
-                What needs attention right now — based on the last Airtable sync. Refresh data
-                from{" "}
-                <Link href="/admin/integrations" className="text-terracotta hover:underline">
-                  Integrations
-                </Link>
-                .
+                What needs attention right now — based on the last Airtable sync.
               </p>
             </div>
             <div className="flex flex-col items-end gap-xs">
@@ -248,7 +242,6 @@ function Inner() {
             )}
             </div>
           </div>
-          <InventoryNav />
           <DashboardJumpNav />
         </header>
 
@@ -274,11 +267,11 @@ function Inner() {
           <>
             {/* Stats summary */}
             <section id="stats" className="scroll-mt-24 grid gap-md md:grid-cols-5">
-              <Stat label="Variants tracked" value={data.stats.linked_variants} sub={`of ${data.stats.total_variants}`} tone="neutral" href="/admin/inventory/variants" />
-              <Stat label="Critical (< 1 wk)" value={data.stats.critical_count} tone={data.stats.critical_count > 0 ? "critical" : "neutral"} href="/admin/inventory/variants?low_stock=1" />
-              <Stat label="Warning (1–4 wks)" value={data.stats.warning_count} tone={data.stats.warning_count > 0 ? "warning" : "neutral"} href="/admin/inventory/variants?low_stock=1" />
-              <Stat label="Healthy (4+ wks)" value={data.stats.healthy_count} tone="success" href="/admin/inventory/variants" />
-              <Stat label="No burn data" value={data.stats.untracked_count} tone="neutral" sub="can't compute weeks" href="/admin/inventory/variants" />
+              <Stat label="Variants tracked" value={data.stats.linked_variants} sub={`of ${data.stats.total_variants}`} tone="neutral" />
+              <Stat label="Critical (< 1 wk)" value={data.stats.critical_count} tone={data.stats.critical_count > 0 ? "critical" : "neutral"} />
+              <Stat label="Warning (1–4 wks)" value={data.stats.warning_count} tone={data.stats.warning_count > 0 ? "warning" : "neutral"} />
+              <Stat label="Healthy (4+ wks)" value={data.stats.healthy_count} tone="success" />
+              <Stat label="No burn data" value={data.stats.untracked_count} tone="neutral" sub="can't compute weeks" />
             </section>
 
             {revenue && <RevenueSnapshotCard revenue={revenue} />}
@@ -315,12 +308,6 @@ function Inner() {
                     Variants with under 4 weeks of stock · sorted by urgency
                   </p>
                 </div>
-                <Link
-                  href="/admin/inventory/variants?low_stock=1"
-                  className="text-tiny uppercase tracking-widest text-clay hover:underline"
-                >
-                  See all →
-                </Link>
               </header>
               {data.low_stock.length === 0 ? (
                 <p className="px-lg py-md text-small text-stone/60">
@@ -346,12 +333,7 @@ function Inner() {
                           <tr key={v.id} className="border-t border-sand/30 align-top">
                             <Td>
                               {v.master_item_name ? (
-                                <Link
-                                  href={`/admin/inventory/items/${v.master_item_id}`}
-                                  className="text-terracotta hover:underline"
-                                >
-                                  {v.master_item_name}
-                                </Link>
+                                <span className="text-stone">{v.master_item_name}</span>
                               ) : (
                                 <span className="text-stone/40">unlinked</span>
                               )}
@@ -426,8 +408,6 @@ function AtRiskCustomersCard({
       id="at-risk"
       title="At-risk customers"
       subtitle="High Klaviyo CLV × high churn probability — retention targets"
-      actionHref="/admin/inventory/customers"
-      actionLabel="See all customers →"
     >
       <div className="overflow-x-auto">
         <table className="w-full min-w-[800px] text-small">
@@ -587,8 +567,6 @@ function TransfersInFlightCard({ transfers }: { transfers: DashboardTransfer[] }
           )}
         </>
       }
-      actionHref="/admin/inventory/transfers"
-      actionLabel="See all transfers →"
     >
       <div className="overflow-x-auto">
         <table className="w-full min-w-[900px] text-small">
@@ -613,16 +591,7 @@ function TransfersInFlightCard({ transfers }: { transfers: DashboardTransfer[] }
                 >
                   <Td>
                     {t.master_item_name ? (
-                      t.master_item_id ? (
-                        <Link
-                          href={`/admin/inventory/items/${t.master_item_id}`}
-                          className="text-terracotta hover:underline"
-                        >
-                          {t.master_item_name}
-                        </Link>
-                      ) : (
-                        t.master_item_name
-                      )
+                      <span className="text-stone">{t.master_item_name}</span>
                     ) : (
                       <span className="text-stone/40">unlinked</span>
                     )}
@@ -688,8 +657,6 @@ function OpenOrdersCard({ summary }: { summary: DashboardOpenOrdersSummary }) {
           )}
         </>
       }
-      actionHref="/admin/inventory/orders"
-      actionLabel="See all orders →"
     >
       <div className="overflow-x-auto">
         <table className="w-full min-w-[800px] text-small">
@@ -775,11 +742,7 @@ function StaleDataBanner({ status }: { status: AirtableStatus }) {
     <Banner tone={oldestH >= 24 ? "critical" : "warning"}>
       <strong>{label}.</strong>{" "}
       <span className="text-stone/80">
-        Inventory numbers below may be behind reality. Check sync status on{" "}
-        <Link href="/admin/integrations" className="underline">
-          Integrations
-        </Link>
-        .
+        Inventory numbers below may be behind reality.
       </span>
       {!status.auto_sync_enabled && (
         <span className="ml-sm font-mono text-tiny uppercase tracking-widest">
@@ -942,8 +905,6 @@ function WebhookActivityCard({ events }: { events: WebhookEvent[] }) {
           )}
         </>
       }
-      actionHref="/admin/integrations"
-      actionLabel="Integrations →"
     >
       <ul className="space-y-xs px-lg pb-lg pt-md text-small">
         {recent.map((e) => {
@@ -991,8 +952,6 @@ function PunchCorrectionsBanner({ pending }: { pending: PunchCorrectionWithUsers
   return (
     <Banner
       tone={ageDays >= 3 ? "critical" : "warning"}
-      actionHref="/admin/punch-corrections"
-      actionLabel="Review →"
     >
       <strong>
         {count} punch correction{count === 1 ? "" : "s"} awaiting review
@@ -1009,8 +968,6 @@ function SyncErrorBanner({ errors }: { errors: AirtableSyncErrorRow[] }) {
   return (
     <Banner
       tone="critical"
-      actionHref="/admin/inventory/sync-errors"
-      actionLabel="Review →"
     >
       <strong>
         {errors.length} unresolved sync error{errors.length === 1 ? "" : "s"}.
@@ -1103,8 +1060,6 @@ function TopCustomersCard({
       id="top-customers"
       title="Top customers · last 90 days"
       subtitle={`${top.length} customer${top.length === 1 ? "" : "s"}`}
-      actionHref="/admin/inventory/customers"
-      actionLabel="All customers →"
     >
       <div className="overflow-x-auto">
         <table className="w-full min-w-[700px] text-small">
@@ -1228,8 +1183,6 @@ function TopSKUsCard({ skus }: { skus: RevenueDashboard["top_skus_90d"] }) {
           </span>
         </>
       }
-      actionHref="/admin/inventory/revenue"
-      actionLabel="Full revenue →"
     >
       <div className="overflow-x-auto">
         <table className="w-full min-w-[600px] text-small">
@@ -1387,12 +1340,6 @@ function RevenueSnapshotCard({ revenue }: { revenue: RevenueDashboard }) {
             Shopify orders · gross revenue, line items, AOV
           </p>
         </div>
-        <Link
-          href="/admin/inventory/revenue"
-          className="text-tiny uppercase tracking-widest text-clay hover:underline"
-        >
-          Full breakdown →
-        </Link>
       </header>
       <div className="grid gap-md p-lg md:grid-cols-4">
         {today && (
@@ -1478,8 +1425,6 @@ function BuyListCard({ rows }: { rows: BuyListRow[] }) {
           )}
         </>
       }
-      actionHref="/admin/inventory/buy-list"
-      actionLabel="Full buy list →"
     >
       <div className="overflow-x-auto">
         <table className="w-full min-w-[800px] text-small">
@@ -1547,8 +1492,6 @@ function ProductionCapacityCard({ planning }: { planning: ProductionPlanRow[] })
           <span className="ml-sm text-stone/60">— limited by ingredient stock</span>
         </>
       }
-      actionHref="/admin/inventory/production-planning"
-      actionLabel="Full plan →"
     >
       <div className="overflow-x-auto">
         <table className="w-full min-w-[700px] text-small">

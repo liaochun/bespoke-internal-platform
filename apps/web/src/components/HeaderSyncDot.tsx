@@ -9,14 +9,14 @@
  *   critical = configured + last sync >24h ago OR ≥1 unresolved error
  *   muted   = not configured
  *
- * Fetches once on mount + every 2 minutes while the tab is visible. Click
- * to jump to /admin/integrations.
+ * Fetches once on mount + every 2 minutes while the tab is visible. In the
+ * real app this links to /admin/integrations; that page isn't part of this
+ * curated excerpt, so here it's a status indicator only (not clickable).
  *
  * Gated to capabilities that care about the mirror — inventory viewers
  * and managers. Other users see nothing (no fetch, no dot).
  */
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { useCurrentUser } from "@/components/AuthGate";
@@ -122,13 +122,12 @@ export function HeaderSyncDot() {
       : style.label;
 
   return (
-    <Link
-      href="/admin/integrations"
+    <span
       title={`Airtable: ${detail}`}
       aria-label={`Airtable mirror status: ${detail}`}
       className={`inline-flex h-3 w-3 items-center justify-center rounded-full ring-2 ${style.ring}`}
     >
       <span className={`block h-full w-full rounded-full ${style.dot}`} />
-    </Link>
+    </span>
   );
 }

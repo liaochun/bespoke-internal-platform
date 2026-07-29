@@ -75,21 +75,18 @@ export function OpsV2HeroStrip() {
   return (
     <section className="grid grid-cols-2 gap-sm md:grid-cols-4">
       <Card
-        href="/admin/inventory/replenishment"
         label="Need to make"
         value={makeCount}
         tone={makeCount && makeCount > 0 ? "critical" : "success"}
         hint="finished SKUs below min"
       />
       <Card
-        href="/admin/inventory/replenishment"
         label="Need to order"
         value={orderCount}
         tone={orderCount && orderCount > 0 ? "warning" : "success"}
         hint="ingredients + packaging"
       />
       <Card
-        href="/admin/inventory/transfers-v2"
         label="Active transfers"
         value={activeTransfers}
         tone={activeTransfers && activeTransfers > 0 ? "neutral" : "success"}
@@ -113,22 +110,27 @@ function Card({
   tone,
   hint,
 }: {
-  href: string;
+  href?: string;
   label: string;
   value: number | null;
   tone: Tone;
   hint: string;
 }) {
-  return (
-    <Link
-      href={href}
-      className="block rounded-md border border-sand/30 bg-softCream p-md hover:bg-sand/10"
-    >
+  const body = (
+    <>
       <p className="text-tiny uppercase tracking-widest text-clay">{label}</p>
       <p className={`mt-xs font-serif text-h1 ${TONE_CLASS[tone]}`}>
         {value === null ? "—" : value}
       </p>
       <p className="mt-xs text-tiny text-stone/50">{hint}</p>
+    </>
+  );
+  const className = "block rounded-md border border-sand/30 bg-softCream p-md hover:bg-sand/10";
+  return href ? (
+    <Link href={href} className={className}>
+      {body}
     </Link>
+  ) : (
+    <div className={className}>{body}</div>
   );
 }

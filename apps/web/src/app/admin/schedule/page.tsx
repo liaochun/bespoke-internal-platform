@@ -1301,12 +1301,9 @@ function Inner() {
                           <p className="text-small text-stone">
                             {fmtTime(s.starts_at)}–{fmtTime(s.ends_at)}
                           </p>
-                          <Link
-                            href={`/admin/staff/${s.user_id}`}
-                            className="mt-xs block text-small font-medium text-stone hover:text-terracotta hover:underline"
-                          >
+                          <p className="mt-xs text-small font-medium text-stone">
                             {s.user.full_name}
-                          </Link>
+                          </p>
                           {s.role_label && (
                             <p className="mt-xs text-tiny text-stone/60">{s.role_label}</p>
                           )}
@@ -1390,12 +1387,9 @@ function Inner() {
                           <p className="text-small text-stone">
                             {fmtTime(s.starts_at)}–{fmtTime(s.ends_at)}
                           </p>
-                          <Link
-                            href={`/admin/staff/${s.user_id}`}
-                            className="mt-xs block text-small font-medium text-stone hover:text-terracotta hover:underline"
-                          >
+                          <p className="mt-xs text-small font-medium text-stone">
                             {s.user.full_name}
-                          </Link>
+                          </p>
                           {s.role_label && (
                             <p className="mt-xs text-tiny text-stone/60">{s.role_label}</p>
                           )}
@@ -1800,12 +1794,7 @@ function StaffGrid({
                 scope="row"
                 className="sticky left-0 z-10 bg-inherit px-md py-sm text-left align-top border-b border-sand/20"
               >
-                <Link
-                  href={`/admin/staff/${u.id}`}
-                  className="block font-medium text-stone hover:text-terracotta hover:underline"
-                >
-                  {u.full_name}
-                </Link>
+                <p className="font-medium text-stone">{u.full_name}</p>
                 <span className="text-tiny text-stone/50">{u.email}</span>
                 {(() => {
                   // OOO ranges overlapping this visible week, listed

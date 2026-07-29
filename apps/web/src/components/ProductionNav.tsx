@@ -10,12 +10,11 @@ import { usePathname } from "next/navigation";
  * top-level nav entry (see Header.tsx) instead of living under Inventory.
  * Keep this list in sync with `productionLinks()` in Header.tsx.
  */
+// Production history / recipes / rate guardrails exist in the real app but
+// aren't part of this curated excerpt, so they're left out here too.
 const TABS = [
   { href: "/admin/inventory/production-schedule", label: "Production run" },
   { href: "/admin/inventory/production-calendar", label: "Calendar" },
-  { href: "/admin/inventory/production-history", label: "Production history" },
-  { href: "/admin/inventory/recipes", label: "Recipes" },
-  { href: "/admin/inventory/production-rates/guardrails", label: "Rate guardrails" },
 ];
 
 export function ProductionNav() {
