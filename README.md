@@ -1,5 +1,15 @@
 # Bespoke Internal Operations Platform (Portfolio Excerpt)
 
+## Live Demo
+
+**[northbound-ops-demo.pages.dev](https://northbound-ops-demo.pages.dev/)** — a fully static, client-side-only build of `apps/web` (no backend, no
+real API calls). All data is synthetic, seeded into your browser's `localStorage` on
+first visit, and resets on request via the "Reset demo data" control in the corner of
+every page. Use the "Viewing as" switcher in the header to see the same pages under an
+admin, manager, or staff persona and watch the capability-gated navigation change.
+Nothing entered or clicked in the demo is sent anywhere or persisted outside your
+browser.
+
 This repository is a **curated excerpt** from a private, production business-operations
 platform built by **liaochun** for a real small-manufacturing / retail client
 ("Northbound Ops" below is a stand-in brand — the real company name, domain, and
@@ -58,16 +68,19 @@ from the actual app:
 - **Production schedule + calendar** (`app/admin/inventory/production-schedule`, `production-calendar`)
 - **The shift-claim flow, end to end** — staff call-in-sick (`app/me/schedule`), the
   manager queue for open shift offers (`app/admin/sick-calls`), and the unauthenticated
-  claim page (`app/shifts/claim/[token]`)
+  claim page (`app/shifts/claim`)
 - **Kiosk clock-in** (`app/kiosk/clock`)
 - **Admin scheduling + timesheets** (`app/admin/schedule`, `app/admin/timesheets`)
 - **Roles & capabilities admin** (`app/admin/roles`, `app/admin/users`)
 
 `apps/web/src/lib/api.ts` is **not** a copy of the real client (which is ~5,400 lines /
 ~370 typed functions covering the entire private API surface). It's a from-scratch,
-much shorter file implementing just the shared fetch helper and a curated slice of
-the endpoints these six page groups call, enough to read as internally consistent —
-not enough to reconstruct the real API.
+much shorter file covering just the endpoints these six page groups call, enough to
+read as internally consistent — not enough to reconstruct the real API. For the live
+demo above, this file's real implementation was additionally swapped for a
+localStorage-backed one (`apps/web/src/lib/demoStore.ts` + `demoSeed.ts`) so the exact
+same page components run entirely client-side with synthetic data — see the "Live
+Demo" section up top.
 
 ## What's deliberately excluded
 

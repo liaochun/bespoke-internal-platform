@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { useCurrentUser } from "@/components/AuthGate";
 import { HeaderSyncDot } from "@/components/HeaderSyncDot";
 import { NavDropdown, NavItem } from "@/components/NavDropdown";
+import { PersonaSwitcher } from "@/components/PersonaSwitcher";
 import { CurrentUser, fetchNavLayout, logout, NavLayout } from "@/lib/api";
 import {
   CAP,
@@ -320,7 +321,8 @@ export function Header() {
     try {
       await logout();
     } finally {
-      router.replace("/login");
+      // No real session to end in the demo — just bounce home.
+      router.replace("/");
       router.refresh();
     }
   };
@@ -338,15 +340,10 @@ export function Header() {
   const isStaffOnly = !canManageWorkforce(user) && !showAdmin;
 
   return (
-    <header className={`border-b border-sand/30 ${process.env.NEXT_PUBLIC_API_URL?.includes("dev-api") ? "bg-red-100" : "bg-warmWhite"}`}>
+    <header className="border-b border-sand/30 bg-warmWhite">
       <div className="mx-auto flex max-w-6xl items-center gap-md px-md py-md md:px-lg">
         <Link href="/" className="flex items-center gap-xs font-serif text-h3 text-stone hover:opacity-80">
           Northbound Ops
-          {process.env.NEXT_PUBLIC_API_URL?.includes("dev-api") && (
-            <span className="font-mono text-tiny font-bold uppercase tracking-widest text-critical">
-              DEV
-            </span>
-          )}
         </Link>
 
         {/* Desktop nav */}
@@ -384,6 +381,7 @@ export function Header() {
 
         {/* Right side */}
         <div className="ml-auto flex items-center gap-sm">
+          <PersonaSwitcher />
           <HeaderSyncDot />
           <Link
             href="/me/profile"
@@ -426,8 +424,9 @@ export function Header() {
 
       {/* Mobile drawer */}
       {drawerOpen && (
-        <div className={`border-t border-sand/30 lg:hidden ${process.env.NEXT_PUBLIC_API_URL?.includes("dev-api") ? "bg-red-100" : "bg-softCream"}`}>
+        <div className="border-t border-sand/30 bg-softCream lg:hidden">
           <div className="mx-auto flex max-w-6xl flex-col gap-md px-md py-md md:px-lg">
+            <PersonaSwitcher />
             {showWorkforce && wfLinks.length > 0 && (
               <DrawerSection title="Workforce" links={wfLinks} onClick={() => setDrawerOpen(false)} />
             )}

@@ -1,7 +1,13 @@
-// Excerpted from a private production codebase for portfolio purposes; some imports/dependencies intentionally omitted.
+// Adapted for the static demo build: there is no real backend/session, so
+// this no longer redirects to a /login page. Instead it resolves whichever
+// "demo persona" is currently selected (see the Header persona switcher),
+// defaulting to the admin persona the first time the app loads in a browser.
+// The `unauthenticated` state and 401-shaped ApiError path are kept so the
+// surrounding shape (and any code that pattern-matches on it) still compiles
+// unchanged; in practice fetchMe() only rejects if localStorage is
+// unavailable entirely.
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { createContext, useContext, useEffect, useState } from "react";
 
 import { ApiError, CurrentUser, fetchMe } from "@/lib/api";
@@ -26,9 +32,6 @@ export function useCurrentUser(): CurrentUser {
 }
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const search = useSearchParams();
   const [state, setState] = useState<AuthState>({ status: "loading" });
 
   useEffect(() => {
@@ -39,14 +42,8 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
       })
       .catch((err: unknown) => {
         if (cancelled) return;
-        if (err instanceof ApiError && err.status === 401) {
+        if (err instanceof ApiError) {
           setState({ status: "unauthenticated" });
-          // Preserve the path + querystring so post-login bounces back here.
-          const qs = search.toString();
-          const here = pathname + (qs ? `?${qs}` : "");
-          const isLoginPage = pathname.startsWith("/login");
-          const target = isLoginPage ? "/login" : `/login?next=${encodeURIComponent(here)}`;
-          router.replace(target);
         } else {
           setState({ status: "unauthenticated" });
         }
@@ -54,21 +51,42 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     return () => {
       cancelled = true;
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router, pathname]);
+  }, []);
+
+  // Re-resolve whenever the demo persona switcher fires this event, so the
+  // whole capability-gated tree re-renders under the new persona instantly.
+  useEffect(() => {
+    const onPersonaChange = () => {
+      setState({ status: "loading" });
+      fetchMe()
+        .then((user) => setState({ status: "authenticated", user }))
+        .catch(() => setState({ status: "unauthenticated" }));
+    };
+    window.addEventListener("northbound:persona-changed", onPersonaChange);
+    return () => window.removeEventListener("northbound:persona-changed", onPersonaChange);
+  }, []);
 
   if (state.status === "loading") {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <p className="font-mono text-tiny uppercase tracking-widest text-clay">
-          Verifying session…
+          Loading demo…
         </p>
       </div>
     );
   }
 
   if (state.status === "unauthenticated") {
-    return null;
+    return (
+      <div className="flex min-h-screen items-center justify-center px-lg text-center">
+        <div>
+          <p className="font-mono text-tiny uppercase tracking-widest text-clay">Demo mode</p>
+          <p className="mt-sm text-body text-stone/70">
+            Couldn&apos;t load a demo persona. Try resetting the demo data below.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return <AuthContext.Provider value={state}>{children}</AuthContext.Provider>;

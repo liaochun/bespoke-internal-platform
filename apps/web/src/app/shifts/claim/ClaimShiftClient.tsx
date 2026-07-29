@@ -1,8 +1,8 @@
 // Excerpted from a private production codebase for portfolio purposes; some imports/dependencies intentionally omitted.
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 
 import { ApiError, claimShift, ClaimPreview, previewClaim } from "@/lib/api";
 import { fmtDateTimeShort, fmtDuration, fmtTime } from "@/lib/format";
@@ -10,8 +10,8 @@ import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 function Inner() {
   useDocumentTitle("Claim shift");
-  const params = useParams<{ token: string }>();
-  const token = params?.token ?? "";
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token") ?? "";
   const router = useRouter();
 
   const [preview, setPreview] = useState<ClaimPreview | null>(null);
@@ -57,6 +57,12 @@ function Inner() {
           <h1 className="mt-sm font-serif text-display text-stone">Claim this shift</h1>
         </header>
 
+        {!token && !error && (
+          <div className="rounded-md border border-critical/40 bg-critical/10 p-md text-small text-stone">
+            No claim token provided. Use the link from your shift-offer email.
+          </div>
+        )}
+
         {error && (
           <div className="mb-lg rounded-md border border-critical/40 bg-critical/10 p-md text-small text-stone">
             {error}
@@ -68,7 +74,7 @@ function Inner() {
           </div>
         )}
 
-        {!preview && !error && (
+        {token && !preview && !error && (
           <div className="h-32 animate-pulse rounded-md border border-sand/30 bg-softCream/60" />
         )}
 
@@ -127,5 +133,9 @@ function Inner() {
 }
 
 export default function ClaimShiftPage() {
-  return <Inner />;
+  return (
+    <Suspense fallback={null}>
+      <Inner />
+    </Suspense>
+  );
 }
