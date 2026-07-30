@@ -2,7 +2,7 @@
 "use client";
 
 /**
- * Tiny status dot for the global Header. One-glance Airtable mirror
+ * Tiny status dot for the global Header. One-glance ops mirror
  * health from any page:
  *   green   = configured + last sync within 2h, no unresolved errors
  *   warning = configured + last sync 2–24h ago OR auto-sync disabled
@@ -21,9 +21,9 @@ import { useEffect, useState } from "react";
 
 import { useCurrentUser } from "@/components/AuthGate";
 import {
-  AirtableStatus,
-  fetchAirtableStatus,
-  listAirtableSyncErrors,
+  MirrorSyncStatus,
+  fetchMirrorSyncStatus,
+  listMirrorSyncErrors,
 } from "@/lib/api";
 import { CAP, has } from "@/lib/capabilities";
 import { useVisibleInterval } from "@/lib/useVisibleInterval";
@@ -64,7 +64,7 @@ const RELEVANT_KEYS = [
   "orders",
 ];
 
-function classify(status: AirtableStatus | null, unresolvedErrors: number): Tone {
+function classify(status: MirrorSyncStatus | null, unresolvedErrors: number): Tone {
   if (!status?.configured) return "muted";
   if (unresolvedErrors > 0) return "critical";
 
@@ -86,14 +86,14 @@ export function HeaderSyncDot() {
   const me = useCurrentUser();
   const eligible = has(me, CAP.view_inventory) || has(me, CAP.manage_inventory);
 
-  const [status, setStatus] = useState<AirtableStatus | null>(null);
+  const [status, setStatus] = useState<MirrorSyncStatus | null>(null);
   const [errors, setErrors] = useState<number>(0);
 
   const load = async () => {
     try {
       const [st, se] = await Promise.allSettled([
-        fetchAirtableStatus(),
-        listAirtableSyncErrors({ only_unresolved: true, limit: 1 }),
+        fetchMirrorSyncStatus(),
+        listMirrorSyncErrors({ only_unresolved: true, limit: 1 }),
       ]);
       setStatus(st.status === "fulfilled" ? st.value : null);
       setErrors(se.status === "fulfilled" ? se.value.length : 0);
@@ -123,8 +123,8 @@ export function HeaderSyncDot() {
 
   return (
     <span
-      title={`Airtable: ${detail}`}
-      aria-label={`Airtable mirror status: ${detail}`}
+      title={`Ops mirror: ${detail}`}
+      aria-label={`Ops mirror status: ${detail}`}
       className={`inline-flex h-3 w-3 items-center justify-center rounded-full ring-2 ${style.ring}`}
     >
       <span className={`block h-full w-full rounded-full ${style.dot}`} />

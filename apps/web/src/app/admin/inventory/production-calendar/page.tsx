@@ -37,8 +37,8 @@ import {
   listScheduledOn,
   markProductionRunBagged,
   markProductionRunSealed,
-  pushProductionRunsToAirtable,
-  syncAirtableProductionRuns,
+  pushProductionRunsToMirror,
+  syncMirrorProductionRuns,
   updateProductionRun,
   type MasterItemWithStock,
   type ProductionRun,
@@ -357,8 +357,8 @@ function Inner() {
                     setSyncing(true);
                     setError(null);
                     try {
-                      const r = await syncAirtableProductionRuns();
-                      setSuccess(`Pulled from Airtable legacy table — ${r.created} created, ${r.updated} updated.`);
+                      const r = await syncMirrorProductionRuns();
+                      setSuccess(`Pulled from mirror legacy table — ${r.created} created, ${r.updated} updated.`);
                       await refresh();
                     } catch (e) {
                       setError((e as Error).message);
@@ -367,9 +367,9 @@ function Inner() {
                     }
                   }}
                   className="rounded-sm border border-clay/50 bg-warmWhite px-md py-xs text-tiny uppercase tracking-widest text-stone hover:bg-clay/10 disabled:opacity-50"
-                  title="Pull Airtable legacy Production Runs → local mirror"
+                  title="Pull mirror legacy Production Runs → local mirror"
                 >
-                  {syncing ? "Syncing…" : "↓ Pull Airtable"}
+                  {syncing ? "Syncing…" : "↓ Pull mirror"}
                 </button>
                 <button
                   type="button"
@@ -378,8 +378,8 @@ function Inner() {
                     setSyncing(true);
                     setError(null);
                     try {
-                      const r = await pushProductionRunsToAirtable();
-                      setSuccess(`Pushed to Airtable — ${r.pushed} pushed, ${r.skipped} skipped, ${r.errors} errors.`);
+                      const r = await pushProductionRunsToMirror();
+                      setSuccess(`Pushed to mirror — ${r.pushed} pushed, ${r.skipped} skipped, ${r.errors} errors.`);
                     } catch (e) {
                       setError((e as Error).message);
                     } finally {
@@ -387,9 +387,9 @@ function Inner() {
                     }
                   }}
                   className="rounded-sm border border-terracotta/50 bg-warmWhite px-md py-xs text-tiny uppercase tracking-widest text-terracotta hover:bg-terracotta/10 disabled:opacity-50"
-                  title="Push platform production runs → Airtable (requires AIRTABLE_PUSH_ENABLED=true)"
+                  title="Push platform production runs → mirror (requires MIRROR_PUSH_ENABLED=true)"
                 >
-                  {syncing ? "Syncing…" : "↑ Push to Airtable"}
+                  {syncing ? "Syncing…" : "↑ Push to mirror"}
                 </button>
               </>
             )}

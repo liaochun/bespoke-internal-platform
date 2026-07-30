@@ -1033,20 +1033,20 @@ export const fetchBuyList = async (_params?: { only_short?: boolean }): Promise<
   return delay(rows);
 };
 
-export type AirtableStatus = {
+export type MirrorSyncStatus = {
   configured: boolean;
   auto_sync_enabled: boolean;
   last_sync_by_table: Record<string, string | null>;
 };
-export const fetchAirtableStatus = async (): Promise<AirtableStatus> => {
+export const fetchMirrorSyncStatus = async (): Promise<MirrorSyncStatus> => {
   const keys = ["master_items", "variants", "transactions", "transfers", "production_runs", "suppliers_ingredients", "bom_lines", "orders", "wholesale_pricing"];
   const last_sync_by_table: Record<string, string | null> = {};
   for (const k of keys) last_sync_by_table[k] = new Date(Date.now() - 20 * 60_000).toISOString();
   return delay({ configured: true, auto_sync_enabled: true, last_sync_by_table });
 };
 
-export type AirtableSyncErrorRow = { id: string; operation: string | null; error_cause: string | null; resolved: boolean; created_at: string };
-export const listAirtableSyncErrors = async (_params?: { only_unresolved?: boolean; limit?: number }): Promise<AirtableSyncErrorRow[]> => delay([]);
+export type MirrorSyncErrorRow = { id: string; operation: string | null; error_cause: string | null; resolved: boolean; created_at: string };
+export const listMirrorSyncErrors = async (_params?: { only_unresolved?: boolean; limit?: number }): Promise<MirrorSyncErrorRow[]> => delay([]);
 
 export type WebhookEvent = { id: string; source: string; topic: string; status: string; received_at: string };
 export const listWebhookEvents = async (params?: { limit?: number }): Promise<WebhookEvent[]> => {
@@ -1581,17 +1581,17 @@ export type NoHistoryReportRow = {
   sku: string | null;
   name: string;
   status: string;
-  airtable_run_count: number;
-  airtable_completed_count: number;
-  airtable_total_finished_product: number;
-  first_airtable_run_date: string | null;
-  last_airtable_run_date: string | null;
-  has_airtable_evidence: boolean;
+  mirror_run_count: number;
+  mirror_completed_count: number;
+  mirror_total_finished_product: number;
+  first_mirror_run_date: string | null;
+  last_mirror_run_date: string | null;
+  has_mirror_evidence: boolean;
 };
 export type NoHistoryReport = {
   total_finished_items: number;
   items_missing_native_history: number;
-  items_missing_with_airtable_evidence: number;
+  items_missing_with_mirror_evidence: number;
   rows: NoHistoryReportRow[];
 };
 export const getProductionNoHistoryReport = async (): Promise<NoHistoryReport> => {
@@ -1602,18 +1602,18 @@ export const getProductionNoHistoryReport = async (): Promise<NoHistoryReport> =
   return delay({
     total_finished_items: finished.length,
     items_missing_native_history: missing.length,
-    items_missing_with_airtable_evidence: 0,
+    items_missing_with_mirror_evidence: 0,
     rows: missing.map((i) => ({
       item_id: i.id,
       sku: i.sku,
       name: i.name,
       status: "no runs",
-      airtable_run_count: 0,
-      airtable_completed_count: 0,
-      airtable_total_finished_product: 0,
-      first_airtable_run_date: null,
-      last_airtable_run_date: null,
-      has_airtable_evidence: false,
+      mirror_run_count: 0,
+      mirror_completed_count: 0,
+      mirror_total_finished_product: 0,
+      first_mirror_run_date: null,
+      last_mirror_run_date: null,
+      has_mirror_evidence: false,
     })),
   });
 };
@@ -1621,8 +1621,8 @@ export const getProductionNoHistoryReport = async (): Promise<NoHistoryReport> =
 // Sync/drift-style operations against the (nonexistent) third-party systems —
 // there's nothing real to reconcile against in the demo, so these just
 // report "already in sync."
-export const syncAirtableProductionRuns = async (): Promise<{ created: number; updated: number }> => delay({ created: 0, updated: 0 });
-export const pushProductionRunsToAirtable = async (): Promise<{ pushed: number; skipped: number; errors: number }> =>
+export const syncMirrorProductionRuns = async (): Promise<{ created: number; updated: number }> => delay({ created: 0, updated: 0 });
+export const pushProductionRunsToMirror = async (): Promise<{ pushed: number; skipped: number; errors: number }> =>
   delay({ pushed: 0, skipped: getDb().productionRuns.length, errors: 0 });
 
 // ─── Inventory items + recipes ───────────────────────────────────────────

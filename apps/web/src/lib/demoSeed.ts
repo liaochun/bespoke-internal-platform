@@ -715,7 +715,7 @@ function webhookEventsSeed(): DemoWebhookEvent[] {
   const now = Date.now();
   return Array.from({ length: 6 }, (_, i) => ({
     id: uid("webhook"),
-    source: i % 2 === 0 ? "shopify" : "airtable",
+    source: i % 2 === 0 ? "shopify" : "mirror",
     topic: i % 2 === 0 ? "orders/create" : "table.sync",
     status: i === 5 ? "failed" : "processed",
     received_at: new Date(now - i * 40 * 60_000).toISOString(),

@@ -238,7 +238,7 @@ export function CustomerDrawer({ customerId, onClose, onOpenOrder }: CustomerDra
                     data.customer.order_count_rollup !==
                       uniqueOrders(data.orders) && (
                       <span className="rounded-full bg-warning/15 px-sm py-xs text-tiny uppercase tracking-widest text-warning">
-                        Airtable shows {data.customer.order_count_rollup} orders
+                        Mirror shows {data.customer.order_count_rollup} orders
                       </span>
                     )}
                 </header>

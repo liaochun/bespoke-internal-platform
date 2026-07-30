@@ -297,7 +297,7 @@ export interface DemoDispatchConfig {
 
 export interface DemoWebhookEvent {
   id: string;
-  source: "shopify" | "airtable";
+  source: "shopify" | "mirror";
   topic: string;
   status: "processed" | "failed" | "ignored";
   received_at: string;

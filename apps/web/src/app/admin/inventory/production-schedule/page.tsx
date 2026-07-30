@@ -46,7 +46,7 @@ import {
   resetRateToBaseline,
   setProductionRunStaff,
   setRateHistoryWindow,
-  syncAirtableProductionRuns,
+  syncMirrorProductionRuns,
   updateProductionRun,
   listRecipes,
   type BomPreflightReport,
@@ -174,7 +174,7 @@ function ProductionRecommendationsPanel({ finished }: { finished: MasterItemWith
  *
  * Finished-good SKUs with zero rows in the ops `production_runs` table
  * (the scheduler's own history), cross-referenced against the read-only
- * `airtable_production_runs` mirror. Rows flagged "Airtable evidence"
+ * `mirror_production_runs` mirror. Rows flagged "mirror evidence"
  * are SKUs ops knows for a fact were produced in the past -- that history
  * just never made it into this scheduler's table, so they show up here
  * with no runs at all despite real production having happened.
@@ -201,7 +201,7 @@ function NoHistoryReportPanel() {
 
   const rows = useMemo(() => {
     if (!report) return [];
-    return onlyWithEvidence ? report.rows.filter((r) => r.has_airtable_evidence) : report.rows;
+    return onlyWithEvidence ? report.rows.filter((r) => r.has_mirror_evidence) : report.rows;
   }, [report, onlyWithEvidence]);
 
   return (
@@ -217,7 +217,7 @@ function NoHistoryReportPanel() {
           </h2>
           <p className="mt-xs text-tiny text-stone/60">
             Finished goods with zero rows in this scheduler, cross-referenced against
-            production runs imported from Airtable.
+            production runs imported from the ops mirror.
           </p>
         </div>
         <span className="text-tiny uppercase tracking-widest text-clay">
@@ -247,9 +247,9 @@ function NoHistoryReportPanel() {
                   </span>
                   <span>
                     <span className="font-medium text-critical">
-                      {report.items_missing_with_airtable_evidence}
+                      {report.items_missing_with_mirror_evidence}
                     </span>{" "}
-                    of those have real Airtable production history
+                    of those have real mirror production history
                   </span>
                 </div>
                 <label className="flex items-center gap-xs text-tiny text-stone/70">
@@ -258,7 +258,7 @@ function NoHistoryReportPanel() {
                     checked={onlyWithEvidence}
                     onChange={(e) => setOnlyWithEvidence(e.target.checked)}
                   />
-                  Only show SKUs with Airtable evidence
+                  Only show SKUs with mirror evidence
                 </label>
               </div>
 
@@ -269,9 +269,9 @@ function NoHistoryReportPanel() {
                       <th className="py-xs pr-md text-left">SKU</th>
                       <th className="py-xs pr-md text-left">Name</th>
                       <th className="py-xs pr-md text-left">Status</th>
-                      <th className="py-xs pr-md text-right tabular-nums">Airtable runs</th>
+                      <th className="py-xs pr-md text-right tabular-nums">Mirror runs</th>
                       <th className="py-xs pr-md text-right tabular-nums">Completed</th>
-                      <th className="py-xs pr-md text-right tabular-nums">Finished qty (Airtable)</th>
+                      <th className="py-xs pr-md text-right tabular-nums">Finished qty (mirror)</th>
                       <th className="py-xs pr-md text-left">First run</th>
                       <th className="py-xs text-left">Last run</th>
                     </tr>
@@ -292,16 +292,16 @@ function NoHistoryReportPanel() {
                           <td className="py-xs pr-md">{r.name}</td>
                           <td className="py-xs pr-md text-stone/60">{r.status}</td>
                           <td className="py-xs pr-md text-right font-mono tabular-nums">
-                            {r.airtable_run_count}
+                            {r.mirror_run_count}
                           </td>
                           <td className="py-xs pr-md text-right font-mono tabular-nums">
-                            {r.airtable_completed_count}
+                            {r.mirror_completed_count}
                           </td>
                           <td className="py-xs pr-md text-right font-mono tabular-nums">
-                            {r.airtable_total_finished_product}
+                            {r.mirror_total_finished_product}
                           </td>
-                          <td className="py-xs pr-md">{r.first_airtable_run_date ?? "—"}</td>
-                          <td className="py-xs">{r.last_airtable_run_date ?? "—"}</td>
+                          <td className="py-xs pr-md">{r.first_mirror_run_date ?? "—"}</td>
+                          <td className="py-xs">{r.last_mirror_run_date ?? "—"}</td>
                         </tr>
                       ))
                     )}
@@ -309,10 +309,10 @@ function NoHistoryReportPanel() {
                 </table>
               </div>
               <p className="mt-sm text-tiny text-stone/50">
-                The &ldquo;↓ Sync Airtable&rdquo; button above only refreshes the read-only
-                Airtable mirror — it does not create scheduler runs. Runs with Airtable
+                The &ldquo;↓ Sync mirror&rdquo; button above only refreshes the read-only
+                mirror — it does not create scheduler runs. Runs with mirror
                 evidence can be backfilled via the{" "}
-                <code className="font-mono">POST /integrations/airtable/import-ops-production-runs</code>{" "}
+                <code className="font-mono">POST /integrations/mirror/import-ops-production-runs</code>{" "}
                 endpoint (not yet wired to a button), or added manually below.
               </p>
             </>
@@ -458,8 +458,8 @@ function Inner() {
                   setSyncing(true);
                   setError(null);
                   try {
-                    const r = await syncAirtableProductionRuns();
-                    setSuccess(`Synced from Airtable — ${r.created} created, ${r.updated} updated.`);
+                    const r = await syncMirrorProductionRuns();
+                    setSuccess(`Synced from mirror — ${r.created} created, ${r.updated} updated.`);
                     await refreshList();
                   } catch (e) {
                     setError((e as Error).message);
@@ -469,7 +469,7 @@ function Inner() {
                 }}
                 className="rounded-sm border border-clay/50 bg-warmWhite px-md py-xs text-tiny uppercase tracking-widest text-stone hover:bg-clay/10 disabled:opacity-50"
               >
-                {syncing ? "Syncing…" : "↓ Sync Airtable"}
+                {syncing ? "Syncing…" : "↓ Sync mirror"}
               </button>
             )}
           </div>

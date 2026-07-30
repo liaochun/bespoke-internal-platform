@@ -3,11 +3,13 @@
 /**
  * Persistent, always-visible signal that this is a static demo: nothing here
  * is a real backend, nothing here is real business data, and the visitor can
- * always get back to a clean slate. Rendered once from the root layout so it
- * shows up on every route — including the ones that don't render <Header>
- * (kiosk clock-in, the unauthenticated shift-claim page).
+ * always get back to a clean slate — or back to the dashboard. Rendered once
+ * from the root layout so it shows up on every route — including the ones
+ * that don't render <Header> (kiosk clock-in, the unauthenticated
+ * shift-claim page), which otherwise have no way back to the rest of the demo.
  */
 
+import Link from "next/link";
 import { useState } from "react";
 
 import { resetDemoData } from "@/lib/api";
@@ -33,6 +35,12 @@ export function DemoModeBanner() {
         <strong className="font-medium text-stone">Demo Mode</strong> — data lives only in your
         browser and resets on request
       </span>
+      <Link
+        href="/"
+        className="rounded-full border border-sand bg-warmWhite px-sm py-[3px] text-tiny font-medium text-stone hover:bg-sand/20"
+      >
+        ← Dashboard
+      </Link>
       <button
         type="button"
         onClick={onReset}

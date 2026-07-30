@@ -16,7 +16,7 @@ interface Props {
 
 /**
  * Generic editor for a polymorphic local note attached to any entity.
- * Loads on mount, saves on blur/Enter. Doesn't push to Airtable —
+ * Loads on mount, saves on blur/Enter. Doesn't push to the mirror —
  * notes here are local annotations only.
  */
 export function LocalNoteEditor({ entityType, entityId, label = "Local note", canEdit = true }: Props) {

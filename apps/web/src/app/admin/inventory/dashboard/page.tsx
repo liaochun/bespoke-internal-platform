@@ -12,20 +12,20 @@ import { OpsV2HeroStrip } from "@/components/OpsV2HeroStrip";
 import {
   ApiError,
   AtRiskCustomer,
-  AirtableStatus,
-  AirtableSyncErrorRow,
+  MirrorSyncStatus,
+  MirrorSyncErrorRow,
   BuyListRow,
   DashboardOpenOrdersSummary,
   DashboardProductionRun,
   DashboardTransaction,
   DashboardTransfer,
-  fetchAirtableStatus,
+  fetchMirrorSyncStatus,
   fetchBuyList,
   fetchInventoryDashboard,
   fetchProductionPlanning,
   fetchRevenueDashboard,
   InventoryDashboard,
-  listAirtableSyncErrors,
+  listMirrorSyncErrors,
   listCorrectionsAdmin,
   listShifts,
   listWebhookEvents,
@@ -144,8 +144,8 @@ function Inner() {
   const [planning, setPlanning] = useState<ProductionPlanRow[] | null>(null);
   const [buyList, setBuyList] = useState<BuyListRow[] | null>(null);
   const [revenue, setRevenue] = useState<RevenueDashboard | null>(null);
-  const [syncStatus, setSyncStatus] = useState<AirtableStatus | null>(null);
-  const [syncErrors, setSyncErrors] = useState<AirtableSyncErrorRow[] | null>(null);
+  const [syncStatus, setSyncStatus] = useState<MirrorSyncStatus | null>(null);
+  const [syncErrors, setSyncErrors] = useState<MirrorSyncErrorRow[] | null>(null);
   const [todayShifts, setTodayShifts] = useState<ShiftWithStaff[] | null>(null);
   const [pendingCorrections, setPendingCorrections] = useState<PunchCorrectionWithUsers[] | null>(null);
   const [webhooks, setWebhooks] = useState<WebhookEvent[] | null>(null);
@@ -177,8 +177,8 @@ function Inner() {
         fetchProductionPlanning(),
         fetchBuyList({ only_short: true }),
         fetchRevenueDashboard(),
-        fetchAirtableStatus(),
-        listAirtableSyncErrors({ only_unresolved: true, limit: 5 }),
+        fetchMirrorSyncStatus(),
+        listMirrorSyncErrors({ only_unresolved: true, limit: 5 }),
         listShifts({ start: dayStart, end: dayEnd }),
         listCorrectionsAdmin("pending"),
         listWebhookEvents({ limit: 6 }),
@@ -209,7 +209,7 @@ function Inner() {
     void refresh();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  // Background re-fetch every 60s while visible. Under the 5-min Airtable
+  // Background re-fetch every 60s while visible. Under the 5-min mirror
   // poll so the dashboard reflects new pulls within one tick.
   useVisibleInterval(() => {
     void refresh();
@@ -225,7 +225,7 @@ function Inner() {
               <p className="font-mono text-tiny uppercase tracking-widest text-clay">Inventory</p>
               <h1 className="mt-sm font-serif text-display text-stone">Dashboard</h1>
               <p className="mt-md text-body text-stone/70">
-                What needs attention right now — based on the last Airtable sync.
+                What needs attention right now — based on the last mirror sync.
               </p>
             </div>
             <div className="flex flex-col items-end gap-xs">
@@ -719,7 +719,7 @@ const INVENTORY_RELEVANT_SYNC_KEYS = [
   "wholesale_pricing",
 ];
 
-function StaleDataBanner({ status }: { status: AirtableStatus }) {
+function StaleDataBanner({ status }: { status: MirrorSyncStatus }) {
   if (!status.configured) return null;
   const ages: number[] = [];
   for (const key of INVENTORY_RELEVANT_SYNC_KEYS) {
@@ -876,7 +876,7 @@ function Banner({
 }
 
 function WebhookActivityCard({ events }: { events: WebhookEvent[] }) {
-  // Confirms the Shopify + Airtable receivers are alive. If empty, no
+  // Confirms the Shopify + mirror receivers are alive. If empty, no
   // events have landed in the last batch — could mean either the
   // integration's idle or it's broken. Either way operator wants to know.
   const sorted = [...events].sort(
@@ -963,7 +963,7 @@ function PunchCorrectionsBanner({ pending }: { pending: PunchCorrectionWithUsers
   );
 }
 
-function SyncErrorBanner({ errors }: { errors: AirtableSyncErrorRow[] }) {
+function SyncErrorBanner({ errors }: { errors: MirrorSyncErrorRow[] }) {
   const recent = errors[0];
   return (
     <Banner
