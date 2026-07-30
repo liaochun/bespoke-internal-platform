@@ -1713,30 +1713,36 @@ function kioskStatusFor(db: Db, userId: string): KioskStatus {
   };
 }
 
+// The demo has no real kiosk-token session store; each token maps to the
+// user who authed with it, looked up explicitly at punch time. (An earlier
+// version of this kept only the single most-recently-authed user in module
+// memory, which broke as soon as auth and punch were split across two user
+// interactions — e.g. the "you're already clocked in, continue anyway?"
+// confirm step — since anything else authing in between would clobber it.)
+const kioskSessions = new Map<string, string>(); // token -> userId
+
 // Shared-device PIN auth — issues a short-lived token, not a full session.
 export const kioskAuth = async (pin: string, _device_id?: string | null): Promise<KioskAuthResponse> => {
   const db = getDb();
   const user = db.users.find((u) => u.has_pin && u.pin === pin);
   if (!user) throw new ApiError(401, "Invalid PIN.");
+  const token = uid("kiosktoken");
+  kioskSessions.set(token, user.id);
   return delay({
-    token: uid("kiosktoken"),
+    token,
     expires_in_seconds: 300,
     user: { id: user.id, full_name: user.full_name },
     status: kioskStatusFor(db, user.id),
   });
 };
 
-// The demo has no real kiosk-token session store; we look the acting user up
-// by matching against whoever most recently authed (kept in module memory).
-let lastKioskUserId: string | null = null;
-
 export const kioskPunch = async (
-  _token: string,
+  token: string,
   opts: { punch_type?: PunchType; location?: string; device_id?: string | null } = {},
 ): Promise<KioskPunchResponse> =>
   delay(
     mutateDb((db) => {
-      const userId = lastKioskUserId ?? db.users[0].id;
+      const userId = kioskSessions.get(token) ?? db.users[0].id;
       const punch_type = opts.punch_type ?? "clock_in";
       db.punches.push({
         id: uid("punch"),

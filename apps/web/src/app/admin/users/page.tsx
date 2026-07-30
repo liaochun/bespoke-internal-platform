@@ -245,6 +245,9 @@ function Inner() {
             <div className="mt-md rounded-sm border border-success/40 bg-success/10 p-md">
               <p className="text-tiny uppercase tracking-widest text-clay">Invite link (copy + send)</p>
               <code className="mt-xs block break-all font-mono text-small text-stone">{lastAcceptUrl}</code>
+              <p className="mt-xs text-tiny text-stone/50">
+                Illustrative only — the invite-acceptance page isn&apos;t part of this excerpt, so this link isn&apos;t live.
+              </p>
             </div>
           )}
         </section>
